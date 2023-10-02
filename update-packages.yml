@@ -1,0 +1,62 @@
+name: npm Update Packages
+
+inputs:
+  cron:
+    description: Cron Schedule'
+    required: true
+    default: '0 0 * * *'
+
+on:
+  schedule:
+    - cron: ${{ inputs.cron }}
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-packages:
+    name: Update Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set Up
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'latest'
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run
+        env:
+          GITHUB_TOKEN: ${{ secrets.UPDATE_PACKAGES }}
+        run: |
+          git config --global user.name "Mikl Wolfe"
+          git config --global user.email "wolfemikl@gmail.com"
+          git checkout -b update-packages
+          npm i
+
+          STATUS=0
+          for package in $(jq -r '.dependencies | to_entries[] | "\(.key)@\(.value)"' package.json); do
+            packageName="${package%@*}"
+            v1="${package##*@}"
+            v1="${v1##*^}"
+            v2="$(npm view "${packageName}" version)"
+
+            if [ "${v1}" != "${v2}" ]; then
+              npm i -s --no-package-lock "${packageName}"
+              echo "${packageName} (${v1} -> ${v2})"
+              STATUS=1
+            fi
+          done
+
+          if [ ${STATUS} -eq 1 ]; then
+            git add package.json
+            git commit -am 'chore(dependencies): bump'
+            git push -f origin update-packages
+            gh pr create -l dependencies -t "chore(dependencies): bump ${packageName} (${v1} -> ${v2})" -b "$(npm view ${packageName})"
+            echo "${packageName} (${v1} -> ${v2})" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Packages are already up to date" >> $GITHUB_STEP_SUMMARY
+          fi
