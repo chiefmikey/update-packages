@@ -1,0 +1,40 @@
+{
+  "name": "update-packages",
+  "version": "0.0.1",
+  "description": "GitHub Action for updating package dependencies",
+  "devDependencies": {
+    "mikey-pro": "^6.5.11"
+  },
+  "homepage": "https://github.com/chiefmikey/update-packages#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chiefmikey/update-packages.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chiefmikey/update-packages/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "update-packages",
+    "github",
+    "action",
+    "dependencies",
+    "devDependencies",
+    "package.json",
+    "package-lock.json",
+    "yarn.lock",
+    "npm",
+    "yarn",
+    "pnpm",
+    "update",
+    "upgrade"
+  ],
+  "author": "Mikl Wolfe <wolfe@mikl.io> (https://mikl.io)",
+  "prettier": "@mikey-pro/prettier-config",
+  "eslintConfig": {
+    "extends": "@mikey-pro/eslint-config"
+  },
+  "stylelint": {
+    "extends": "@mikey-pro/stylelint-config"
+  }
+}
