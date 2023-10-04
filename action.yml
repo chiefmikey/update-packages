@@ -1,14 +1,34 @@
 name: npm Update Packages
 
 inputs:
-  cron:
-    description: Cron Schedule'
+  cron-schedule:
+    description: 'Cron schedule'
     required: true
     default: '0 0 * * *'
 
+  package-lock:
+    description: 'Update package-lock.json'
+    required: true
+    default: true
+
+  pr-title:
+    description: 'PR title'
+    required: true
+    default: 'chore(dependencies): bump'
+
+  pr-per:
+    description: 'PR per update'
+    required: true
+    default: true
+
+  pr-labels:
+    description: 'PR labels'
+    required: false
+    default: ""
+
 on:
   schedule:
-    - cron: ${{ inputs.cron }}
+    - cron: ${{ inputs.cron-schedule }} || ''
   workflow_dispatch: {}
 
 permissions:
@@ -29,34 +49,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run
+        using: "composite"
+        shell: bash
+        run: ./src/update-package.sh
         env:
           GITHUB_TOKEN: ${{ secrets.UPDATE_PACKAGES }}
+          PR_TITLE: ${{ inputs.pr-title }}
+          PACKAGE_LOCK: ${{ inputs.package-lock }}
+          PR_PER: ${{ inputs.pr-per }}
+          PR_LABELS: ${{ inputs.pr-labels }}
+
+      - name: Outputs
         run: |
-          git config --global user.name "Mikl Wolfe"
-          git config --global user.email "wolfemikl@gmail.com"
-          git checkout -b update-packages
-          npm i
-
-          STATUS=0
-          for package in $(jq -r '.dependencies | to_entries[] | "\(.key)@\(.value)"' package.json); do
-            packageName="${package%@*}"
-            v1="${package##*@}"
-            v1="${v1##*^}"
-            v2="$(npm view "${packageName}" version)"
-
-            if [ "${v1}" != "${v2}" ]; then
-              npm i -s --no-package-lock "${packageName}"
-              echo "${packageName} (${v1} -> ${v2})"
-              STATUS=1
-            fi
-          done
-
-          if [ ${STATUS} -eq 1 ]; then
-            git add package.json
-            git commit -am 'chore(dependencies): bump'
-            git push -f origin update-packages
-            gh pr create -l dependencies -t "chore(dependencies): bump ${packageName} (${v1} -> ${v2})" -b "$(npm view ${packageName})"
-            echo "${packageName} (${v1} -> ${v2})" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Packages are already up to date" >> $GITHUB_STEP_SUMMARY
-          fi
+          [ "${{ steps.run.output.STATUS }}" = 1 ] && echo "${{ steps.run.output.LOG }}" >> "$GITHUB_STEP_SUMMARY"
+          [ "${{ steps.run.output.STATUS }}" = 0 ] && echo "Packages are already up to date" >> "$GITHUB_STEP_SUMMARY"
