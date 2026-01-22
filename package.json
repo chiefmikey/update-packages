@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "GitHub Action for updating package dependencies",
   "devDependencies": {
-    "mikey-pro": "^6.5.11"
+    "mikey-pro": "^6.6.10"
   },
   "homepage": "https://github.com/chiefmikey/update-packages#readme",
   "repository": {
