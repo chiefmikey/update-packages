@@ -1,9 +1,10 @@
 {
   "name": "update-packages",
   "version": "0.0.1",
+  "type": "module",
   "description": "GitHub Action for updating package dependencies",
   "devDependencies": {
-    "mikey-pro": "^6.5.11"
+    "mikey-pro": "^10.1.0"
   },
   "homepage": "https://github.com/chiefmikey/update-packages#readme",
   "repository": {
@@ -30,11 +31,8 @@
     "upgrade"
   ],
   "author": "Mikl Wolfe <wolfe@mikl.io> (https://mikl.io)",
-  "prettier": "@mikey-pro/prettier-config",
-  "eslintConfig": {
-    "extends": "@mikey-pro/eslint-config"
-  },
+  "prettier": "mikey-pro/prettier",
   "stylelint": {
-    "extends": "@mikey-pro/stylelint-config"
+    "extends": "mikey-pro/stylelint"
   }
 }
